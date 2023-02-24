@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -25,6 +26,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.focus.FocusDirection
 import java.text.NumberFormat
 import com.example.tipper.ui.theme.TipperTheme
 
@@ -50,6 +53,7 @@ fun TipperScreen() {
     val tipPercent = tipInput.toDoubleOrNull() ?: 0.0
     val amount = amountInput.toDoubleOrNull() ?: 0.0
     val tip = calculateTip(amount, tipPercent)
+    val focusManager = LocalFocusManager.current
     Column(
         modifier = Modifier.padding(32.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -65,6 +69,9 @@ fun TipperScreen() {
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Next
             ),
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            ),
             value = amountInput,
             onValueChange = { amountInput = it}
         )
@@ -74,6 +81,8 @@ fun TipperScreen() {
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
             ),
+            keyboardActions = KeyboardActions(
+                onDone = { focusManager.clearFocus() }),
             value = tipInput,
             onValueChange = { tipInput = it }
         )
@@ -83,6 +92,12 @@ fun TipperScreen() {
             modifier = Modifier.align(Alignment.CenterHorizontally),
             fontSize = 20.sp,
             fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = tip,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            fontSize = 30.sp,
+            fontWeight = FontWeight.Medium
         )
 
     }
@@ -95,6 +110,7 @@ fun TipperScreen() {
 fun EditNumberField(
     @StringRes label: Int,
     keyboardOptions: KeyboardOptions,
+    keyboardActions: KeyboardActions,
     value : String,
     onValueChange : (String) -> Unit,
     modifier: Modifier = Modifier
@@ -108,9 +124,12 @@ fun EditNumberField(
             ) },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
-        keyboardOptions = keyboardOptions
+        keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions
     )
 }
+
+
 
 private fun calculateTip(
     amount: Double,
