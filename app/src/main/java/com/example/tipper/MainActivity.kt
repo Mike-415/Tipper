@@ -4,7 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
@@ -18,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -44,6 +43,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun TipperScreen() {
+    var amountInput by remember { mutableStateOf("") }
+    var tipInput by remember { mutableStateOf("") }
+
+    val tipPercent = tipInput.toDoubleOrNull() ?: 0.0
+    val amount = amountInput.toDoubleOrNull() ?: 0.0
+    val tip = calculateTip(amount, tipPercent)
     Column(
         modifier = Modifier.padding(32.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -53,7 +58,16 @@ fun TipperScreen() {
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
         Spacer(modifier = Modifier.height(16.dp))
-        EditNumberField()
+        EditNumberField(
+            label = R.string.bill_amount,
+            value = amountInput,
+            onValueChange = { amountInput = it}
+        )
+        EditNumberField(
+            label = R.string.how_was_the_service,
+            value = tipInput,
+            onValueChange = { tipInput = it }
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = stringResource(R.string.tip_amount, ""),
@@ -69,14 +83,16 @@ fun TipperScreen() {
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun EditNumberField() {
-    var amountInput by remember { mutableStateOf("") }
-    val amount = amountInput.toDoubleOrNull() ?: 0.0
-    val tip = calculateTip(amount)
+fun EditNumberField(
+    @StringRes label: Int,
+    value : String,
+    onValueChange : (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     TextField(
-        value = amountInput,
-        onValueChange = { amountInput = it },
-        label = { Text(stringResource(R.string.cost_of_service)) },
+        value = value,
+        onValueChange = onValueChange,
+        label = { Text(stringResource(label)) },
         modifier = Modifier.fillMaxWidth(),
         singleLine = true,
         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
